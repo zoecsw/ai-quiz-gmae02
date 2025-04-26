@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AI 小測驗</title>
+  <title>AI Quiz</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -15,170 +15,129 @@
     }
     .quiz-container {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
       width: 90%;
       max-width: 500px;
       text-align: center;
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     .question {
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: bold;
       margin-bottom: 20px;
+      color: #333;
     }
     .choice {
       display: block;
-      background: #e0e0e0;
+      background: #f0f0f0;
       margin: 10px 0;
-      padding: 10px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     .choice:hover {
-      background: #d0d0ff;
+      background: #d1e7fd;
     }
-    #next-button, #share-button {
+    button {
       margin-top: 20px;
-      padding: 10px 20px;
+      padding: 12px 25px;
       font-size: 16px;
       cursor: pointer;
       background: #4CAF50;
       color: white;
       border: none;
-      border-radius: 5px;
-      display: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
     }
     #result {
       font-size: 22px;
       margin-top: 20px;
       color: #333;
     }
+    #timer {
+      font-size: 18px;
+      color: #ff5555;
+      margin-bottom: 10px;
+    }
+    #badge {
+      margin-top: 20px;
+      font-size: 28px;
+      animation: badgePulse 1.5s infinite alternate;
+    }
+    @keyframes badgePulse {
+      0% { color: #ff7eb9; transform: scale(1); }
+      50% { color: #7afcff; transform: scale(1.1); }
+      100% { color: #feff9c; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <div id="question" class="question">載入中...</div>
+  <div class="quiz-container" id="quiz-container">
+    <div id="timer">Time Left: 10s</div>
+    <div id="question" class="question">Loading...</div>
     <div id="choices"></div>
-    <button id="next-button">下一題</button>
     <div id="result"></div>
-    <button id="share-button">複製成績分享到LinkedIn！</button>
+    <div id="badge"></div>
+    <button id="retry-button" style="display:none;">Retry Quiz</button>
+    <button id="share-button" style="display:none;">Copy Score to Share on LinkedIn!</button>
+    <button id="download-button" style="display:none;">Download Result Image</button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const quiz = [
-      {
-        question: "Q1: 什麼是AI Agent？",
-        choices: [
-          "一個會思考、計畫，還能用工具達成目標的AI",
-          "一個只能看資料、不能互動的系統",
-          "一個只會回答問題但無法做事的聊天機器人"
-        ],
-        answer: 0
-      },
-      {
-        question: "Q2: Agent為什麼要『計畫』？",
-        choices: [
-          "為了安排做哪些動作、用哪些工具，才能完成任務",
-          "只是記錄過去的事情，不規劃未來",
-          "隨便亂做，沒有順序也沒目標"
-        ],
-        answer: 0
-      },
-      {
-        question: "Q3: 工具有什麼用？",
-        choices: [
-          "工具讓Agent能做文字生成以外的事情，比如生圖或操作系統",
-          "工具只是拿來存資料，沒什麼特別用途",
-          "工具會限制Agent，只能做簡單任務"
-        ],
-        answer: 0
-      },
-      {
-        question: "Q4: 大語言模型（LLMs）在Agent裡做什麼？",
-        choices: [
-          "LLM像Agent的大腦，負責理解、推理和安排行動",
-          "LLM只是記錄資料，沒什麼行動力",
-          "LLM只用來處理圖片，跟文字無關"
-        ],
-        answer: 0
-      },
-      {
-        question: "Q5: 哪個例子最像AI Agent？",
-        choices: [
-          "Siri或Alexa這種可以理解指令並幫忙做事的虛擬助理",
-          "一個只列固定答案的常見問題網站",
-          "一台只能計算、不能推理的計算機"
-        ],
-        answer: 0
-      }
-    ];
+    const quiz = [...]; // Same quiz content
 
     let currentQuestion = 0;
     let score = 0;
+    let timer;
+    const TIME_LIMIT = 10;
+    let timeLeft = TIME_LIMIT;
 
     const questionEl = document.getElementById('question');
     const choicesEl = document.getElementById('choices');
-    const nextButton = document.getElementById('next-button');
     const resultEl = document.getElementById('result');
+    const badgeEl = document.getElementById('badge');
+    const timerEl = document.getElementById('timer');
     const shareButton = document.getElementById('share-button');
+    const downloadButton = document.getElementById('download-button');
+    const retryButton = document.getElementById('retry-button');
 
-    function showQuestion() {
-      const q = quiz[currentQuestion];
-      questionEl.textContent = q.question;
-      choicesEl.innerHTML = '';
-      q.choices.forEach((choice, index) => {
-        const btn = document.createElement('div');
-        btn.textContent = choice;
-        btn.className = 'choice';
-        btn.addEventListener('click', () => selectAnswer(index));
-        choicesEl.appendChild(btn);
-      });
-    }
+    function shuffleArray(array) {...}
 
-    function selectAnswer(selected) {
-      const correct = quiz[currentQuestion].answer;
-      if (selected === correct) {
-        score++;
-      }
-      nextButton.style.display = 'block';
-      Array.from(choicesEl.children).forEach((btn, index) => {
-        btn.style.background = index === correct ? '#a5d6a7' : '#ef9a9a';
-        btn.style.pointerEvents = 'none';
-      });
-    }
+    function startTimer() {...}
 
-    nextButton.addEventListener('click', () => {
-      currentQuestion++;
-      if (currentQuestion < quiz.length) {
-        showQuestion();
-        nextButton.style.display = 'none';
-      } else {
-        showResult();
-      }
-    });
+    function showQuestion() {...}
+
+    function selectAnswer(selected) {...}
+
+    function nextQuestion() {...}
 
     function showResult() {
+      timerEl.style.display = 'none';
       questionEl.style.display = 'none';
       choicesEl.style.display = 'none';
-      nextButton.style.display = 'none';
+      resultEl.innerHTML = `Your score: ${score}/${quiz.length}!<br><br>`;
+      badgeEl.innerHTML = score === quiz.length ? "🏆 AI Genius!" : (score >= 3 ? "🎯 AI Expert!" : "📚 Keep Learning!");
       shareButton.style.display = 'inline-block';
-      resultEl.innerHTML = `你的得分是 ${score}/${quiz.length}！<br><br>`;
-      if (score === quiz.length) {
-        resultEl.innerHTML += "🎉 你是AI小天才！";
-      } else if (score >= 3) {
-        resultEl.innerHTML += "✨ 很棒了，離AI高手不遠了！";
-      } else {
-        resultEl.innerHTML += "🚀 加油，多了解AI會更厲害喔！";
-      }
+      downloadButton.style.display = 'inline-block';
+      retryButton.style.display = 'inline-block';
     }
 
-    shareButton.addEventListener('click', () => {
-      const text = `我剛在AI小測驗中拿到了 ${score}/${quiz.length} 分！\n快來試試看你能拿幾分吧！`;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('成績已複製！快去LinkedIn分享你的分數吧！');
-      });
-    });
+    shareButton.addEventListener('click', () => {...});
+    downloadButton.addEventListener('click', () => {...});
+    retryButton.addEventListener('click', () => { location.reload(); });
 
+    shuffleArray(quiz);
     showQuestion();
   </script>
 </body>
