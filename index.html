@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>AI 小測驗</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .quiz-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .choice {
+      display: block;
+      background: #e0e0e0;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .choice:hover {
+      background: #d0d0ff;
+    }
+    #next-button, #share-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      display: none;
+    }
+    #result {
+      font-size: 22px;
+      margin-top: 20px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="question" class="question">載入中...</div>
+    <div id="choices"></div>
+    <button id="next-button">下一題</button>
+    <div id="result"></div>
+    <button id="share-button">複製成績分享到LinkedIn！</button>
+  </div>
+
+  <script>
+    const quiz = [
+      {
+        question: "Q1: 什麼是AI Agent？",
+        choices: [
+          "一個會思考、計畫，還能用工具達成目標的AI",
+          "一個只能看資料、不能互動的系統",
+          "一個只會回答問題但無法做事的聊天機器人"
+        ],
+        answer: 0
+      },
+      {
+        question: "Q2: Agent為什麼要『計畫』？",
+        choices: [
+          "為了安排做哪些動作、用哪些工具，才能完成任務",
+          "只是記錄過去的事情，不規劃未來",
+          "隨便亂做，沒有順序也沒目標"
+        ],
+        answer: 0
+      },
+      {
+        question: "Q3: 工具有什麼用？",
+        choices: [
+          "工具讓Agent能做文字生成以外的事情，比如生圖或操作系統",
+          "工具只是拿來存資料，沒什麼特別用途",
+          "工具會限制Agent，只能做簡單任務"
+        ],
+        answer: 0
+      },
+      {
+        question: "Q4: 大語言模型（LLMs）在Agent裡做什麼？",
+        choices: [
+          "LLM像Agent的大腦，負責理解、推理和安排行動",
+          "LLM只是記錄資料，沒什麼行動力",
+          "LLM只用來處理圖片，跟文字無關"
+        ],
+        answer: 0
+      },
+      {
+        question: "Q5: 哪個例子最像AI Agent？",
+        choices: [
+          "Siri或Alexa這種可以理解指令並幫忙做事的虛擬助理",
+          "一個只列固定答案的常見問題網站",
+          "一台只能計算、不能推理的計算機"
+        ],
+        answer: 0
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const choicesEl = document.getElementById('choices');
+    const nextButton = document.getElementById('next-button');
+    const resultEl = document.getElementById('result');
+    const shareButton = document.getElementById('share-button');
+
+    function showQuestion() {
+      const q = quiz[currentQuestion];
+      questionEl.textContent = q.question;
+      choicesEl.innerHTML = '';
+      q.choices.forEach((choice, index) => {
+        const btn = document.createElement('div');
+        btn.textContent = choice;
+        btn.className = 'choice';
+        btn.addEventListener('click', () => selectAnswer(index));
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selected) {
+      const correct = quiz[currentQuestion].answer;
+      if (selected === correct) {
+        score++;
+      }
+      nextButton.style.display = 'block';
+      Array.from(choicesEl.children).forEach((btn, index) => {
+        btn.style.background = index === correct ? '#a5d6a7' : '#ef9a9a';
+        btn.style.pointerEvents = 'none';
+      });
+    }
+
+    nextButton.addEventListener('click', () => {
+      currentQuestion++;
+      if (currentQuestion < quiz.length) {
+        showQuestion();
+        nextButton.style.display = 'none';
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      questionEl.style.display = 'none';
+      choicesEl.style.display = 'none';
+      nextButton.style.display = 'none';
+      shareButton.style.display = 'inline-block';
+      resultEl.innerHTML = `你的得分是 ${score}/${quiz.length}！<br><br>`;
+      if (score === quiz.length) {
+        resultEl.innerHTML += "🎉 你是AI小天才！";
+      } else if (score >= 3) {
+        resultEl.innerHTML += "✨ 很棒了，離AI高手不遠了！";
+      } else {
+        resultEl.innerHTML += "🚀 加油，多了解AI會更厲害喔！";
+      }
+    }
+
+    shareButton.addEventListener('click', () => {
+      const text = `我剛在AI小測驗中拿到了 ${score}/${quiz.length} 分！\n快來試試看你能拿幾分吧！`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('成績已複製！快去LinkedIn分享你的分數吧！');
+      });
+    });
+
+    showQuestion();
+  </script>
+</body>
+</html>
