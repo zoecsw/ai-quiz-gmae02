@@ -95,7 +95,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const quiz = [...]; // Same quiz content
+    const quiz = [
+      { question: "What is an AI Agent?", choices: ["An AI that can think, plan, and use tools to achieve goals.", "A system that only reads data but cannot interact.", "A chatbot that only answers questions without acting."], answer: 0 },
+      { question: "Why does an Agent need to plan?", choices: ["To arrange actions and tools to complete tasks.", "Only to record past events without planning.", "To act randomly without goals or sequence."], answer: 0 },
+      { question: "Why are tools important for Agents?", choices: ["Tools allow Agents to do more than just generate text, like creating images or operating systems.", "Tools only store data without helping much.", "Tools limit Agents to simple tasks."], answer: 0 },
+      { question: "What is the role of LLMs in Agents?", choices: ["LLMs act like the brain of an Agent, understanding, reasoning, and planning actions.", "LLMs just store data with no active function.", "LLMs only process images, not text."], answer: 0 },
+      { question: "Which example best shows an AI Agent?", choices: ["A virtual assistant like Siri or Alexa that understands commands and acts.", "A static FAQ page with fixed answers.", "A calculator that can only compute without reasoning."], answer: 0 }
+    ];
 
     let currentQuestion = 0;
     let score = 0;
@@ -112,15 +118,62 @@
     const downloadButton = document.getElementById('download-button');
     const retryButton = document.getElementById('retry-button');
 
-    function shuffleArray(array) {...}
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
 
-    function startTimer() {...}
+    function startTimer() {
+      timeLeft = TIME_LIMIT;
+      timerEl.textContent = `Time Left: ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          nextQuestion();
+        }
+      }, 1000);
+    }
 
-    function showQuestion() {...}
+    function showQuestion() {
+      clearInterval(timer);
+      startTimer();
+      const q = quiz[currentQuestion];
+      questionEl.textContent = q.question;
+      choicesEl.innerHTML = '';
 
-    function selectAnswer(selected) {...}
+      const choiceIndices = [0, 1, 2];
+      shuffleArray(choiceIndices);
 
-    function nextQuestion() {...}
+      choiceIndices.forEach((shuffledIndex) => {
+        const btn = document.createElement('div');
+        btn.textContent = q.choices[shuffledIndex];
+        btn.className = 'choice';
+        btn.addEventListener('click', () => selectAnswer(shuffledIndex));
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selected) {
+      clearInterval(timer);
+      const correct = quiz[currentQuestion].answer;
+      if (selected === correct) {
+        score++;
+      }
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < quiz.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
 
     function showResult() {
       timerEl.style.display = 'none';
@@ -133,9 +186,25 @@
       retryButton.style.display = 'inline-block';
     }
 
-    shareButton.addEventListener('click', () => {...});
-    downloadButton.addEventListener('click', () => {...});
-    retryButton.addEventListener('click', () => { location.reload(); });
+    shareButton.addEventListener('click', () => {
+      const text = `I scored ${score}/${quiz.length} in the AI Quiz!\nTry it out and see how you do!`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Score copied! Share it on LinkedIn!');
+      });
+    });
+
+    downloadButton.addEventListener('click', () => {
+      html2canvas(document.getElementById("quiz-container")).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'ai-quiz-result.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
+
+    retryButton.addEventListener('click', () => {
+      location.reload();
+    });
 
     shuffleArray(quiz);
     showQuestion();
